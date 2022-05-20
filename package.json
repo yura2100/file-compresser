@@ -10,7 +10,7 @@
     "build": "lerna run build",
     "lint": "eslint . --quiet",
     "test": "lerna run test",
-    "e2e": "lerna run e2e"
+    "test:e2e": "lerna run test:e2e"
   },
   "devDependencies": {
     "@types/jest": "^27.5.1",
