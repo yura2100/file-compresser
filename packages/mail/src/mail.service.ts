@@ -1,23 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ITransporter } from './interfaces/transporter.interface';
 import { ITemplateBuilder } from './interfaces/template-builder.interface';
 import { MailType } from './mail-type';
 import { LinkToFileInput } from './inputs';
 import { TRANSPORTER_TOKEN } from './providers/transporter.provider';
 import { TEMPLATE_BUILDER_TOKEN } from './providers/template-builder.provider';
+import { ServerConfig } from './config/config';
 
 @Injectable()
 export class MailService {
   private readonly from: string;
 
-  // TODO: Add ConfigService
   constructor(
     @Inject(TRANSPORTER_TOKEN)
     private readonly transporter: ITransporter,
     @Inject(TEMPLATE_BUILDER_TOKEN)
     private readonly templateBuilder: ITemplateBuilder,
+    configService: ConfigService,
   ) {
-    this.from = process.env.EMAIL_FROM as string;
+    const serverConfig = configService.get<ServerConfig>('server');
+    this.from = serverConfig?.email as string;
   }
 
   async sendLinkToFile(input: LinkToFileInput): Promise<void> {

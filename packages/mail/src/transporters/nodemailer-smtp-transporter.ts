@@ -1,17 +1,19 @@
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { ITransporter, SendInput } from '../interfaces/transporter.interface';
+import { SmtpConfig } from '../config/config';
 
 export class NodemailerSmtpTransporter implements ITransporter {
   private readonly transporter: nodemailer.Transporter;
 
-  // TODO: Add ConfigService
-  constructor() {
+  constructor(configService: ConfigService) {
+    const smtpConfig = configService.get<SmtpConfig>('smtp');
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_ as string,
-      port: Number(process.env.SMTP_PORT),
+      host: smtpConfig?.host,
+      port: smtpConfig?.port,
       auth: {
-        user: process.env.SMTP_USER as string,
-        pass: process.env.SMTP_PASSWORD as string,
+        user: smtpConfig?.user,
+        pass: smtpConfig?.password,
       },
     });
   }

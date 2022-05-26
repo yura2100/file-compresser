@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
 import { TRANSPORTER_TOKEN } from './providers/transporter.provider';
 import { TEMPLATE_BUILDER_TOKEN } from './providers/template-builder.provider';
@@ -14,6 +15,7 @@ describe('MailService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         MailService,
+        ConfigService,
         {
           provide: TRANSPORTER_TOKEN,
           useFactory: () => ({
