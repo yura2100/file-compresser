@@ -16,8 +16,7 @@ export const linkToFileBuildInput: LinkToFileBuildInput = {
   link: linkToFileInput.link,
 };
 
-export const linkToFileHtml = `
-<!doctype html>
+export const linkToFileHtml = `<!doctype html>
 <html lang='en'>
 <head>
     <meta charset='UTF-8'>
