@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
+import { linkToFileInput } from './fixtures';
 
 describe('MailController', () => {
   let mailController: MailController;
@@ -28,13 +29,11 @@ describe('MailController', () => {
   });
 
   it('should send link to file', async () => {
-    jest.spyOn(mailService, 'sendLinkToFile').mockResolvedValue();
-    const result = await mailController.sendLinkToFile({
-      firstName: 'firstName',
-      lastName: 'lastName',
-      email: 'email',
-      link: 'link',
-    });
+    const sendLinkToFile = jest
+      .spyOn(mailService, 'sendLinkToFile')
+      .mockResolvedValue();
+    const result = await mailController.sendLinkToFile(linkToFileInput);
     expect(result).toBeUndefined();
+    expect(sendLinkToFile).toBeCalledWith(linkToFileInput);
   });
 });

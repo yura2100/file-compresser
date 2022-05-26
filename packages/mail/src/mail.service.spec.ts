@@ -5,6 +5,14 @@ import { TRANSPORTER_TOKEN } from './providers/transporter.provider';
 import { TEMPLATE_BUILDER_TOKEN } from './providers/template-builder.provider';
 import { ITransporter } from './interfaces/transporter.interface';
 import { ITemplateBuilder } from './interfaces/template-builder.interface';
+import {
+  email,
+  linkToFileBuildInput,
+  linkToFileHtml,
+  linkToFileInput,
+  linkToFileSendInput,
+} from './fixtures';
+import { MailType } from './mail-type';
 
 describe('MailService', () => {
   let mailService: MailService;
@@ -15,7 +23,6 @@ describe('MailService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         MailService,
-        ConfigService,
         {
           provide: TRANSPORTER_TOKEN,
           useFactory: () => ({
@@ -26,6 +33,12 @@ describe('MailService', () => {
           provide: TEMPLATE_BUILDER_TOKEN,
           useFactory: () => ({
             build: jest.fn(),
+          }),
+        },
+        {
+          provide: ConfigService,
+          useFactory: () => ({
+            get: () => ({ email }),
           }),
         },
       ],
@@ -41,14 +54,16 @@ describe('MailService', () => {
   });
 
   it('should send link to file', async () => {
-    jest.spyOn(transporter, 'send').mockResolvedValue();
-    jest.spyOn(templateBuilder, 'build').mockResolvedValue('<h1>Test</h1>');
-    const result = await mailService.sendLinkToFile({
-      firstName: 'firstName',
-      lastName: 'lastName',
-      email: 'email',
-      link: 'link',
-    });
+    const sendSpy = jest.spyOn(transporter, 'send').mockResolvedValue();
+    const buildSpy = jest
+      .spyOn(templateBuilder, 'build')
+      .mockResolvedValue(linkToFileHtml);
+    const result = await mailService.sendLinkToFile(linkToFileInput);
     expect(result).toBeUndefined();
+    expect(sendSpy).toBeCalledWith(linkToFileSendInput);
+    expect(buildSpy).toBeCalledWith(
+      MailType.LINK_TO_FILE,
+      linkToFileBuildInput,
+    );
   });
 });

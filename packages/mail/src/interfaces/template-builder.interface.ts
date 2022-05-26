@@ -1,6 +1,6 @@
 import { MailType } from '../mail-type';
 
-type LinkToFileBuildInput = {
+export type LinkToFileBuildInput = {
   name: string;
   link: string;
 };
