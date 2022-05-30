@@ -1,8 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IFilesRepository } from './interfaces/files.repository.interface';
-import { IDownloadsRepository } from './interfaces/downloads.repository.interface';
+import {
+  FileOutput,
+  IFilesRepository,
+} from './interfaces/files.repository.interface';
+import {
+  DownloadOutput,
+  IDownloadsRepository,
+} from './interfaces/downloads.repository.interface';
 import {
   CancelDownloadInput,
+  FindManyDownloadsInput,
+  FindManyInput,
   FinishDownloadInput,
   SaveFileInput,
   StartDownloadInput,
@@ -13,6 +21,7 @@ import { DownloadNotStartedException } from './exceptions/download-not-started.e
 import { FILES_REPOSITORY_TOKEN } from './providers/files.repository.provider';
 import { DOWNLOADS_REPOSITORY_TOKEN } from './providers/downloads.repository.provider';
 import { DownloadStatus } from './types';
+import { Paginated } from './outputs';
 
 @Injectable()
 export class StatisticsService {
@@ -22,6 +31,29 @@ export class StatisticsService {
     @Inject(DOWNLOADS_REPOSITORY_TOKEN)
     private readonly downloadsRepository: IDownloadsRepository,
   ) {}
+
+  findFileById(fileId: string): Promise<FileOutput | null> {
+    return this.filesRepository.findById(fileId);
+  }
+
+  findManyFiles({
+    skip = 0,
+    limit = 500,
+  }: FindManyInput): Promise<Paginated<FileOutput>> {
+    return this.filesRepository.findMany({ skip, limit });
+  }
+
+  findDownloadById(downloadId: string): Promise<DownloadOutput | null> {
+    return this.downloadsRepository.findById(downloadId);
+  }
+
+  findManyDownloads({
+    skip = 0,
+    limit = 500,
+    fileId,
+  }: FindManyDownloadsInput): Promise<Paginated<DownloadOutput>> {
+    return this.downloadsRepository.findMany({ skip, limit, fileId });
+  }
 
   saveFile(input: SaveFileInput): Promise<string> {
     return this.filesRepository.create(input);

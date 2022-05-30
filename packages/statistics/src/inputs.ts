@@ -15,3 +15,10 @@ export type FinishDownloadInput = {
 };
 
 export type CancelDownloadInput = FinishDownloadInput;
+
+export type FindManyInput = {
+  skip?: number;
+  limit?: number;
+};
+
+export type FindManyDownloadsInput = FindManyInput & { fileId: string };

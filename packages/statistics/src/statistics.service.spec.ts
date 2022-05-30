@@ -7,9 +7,13 @@ import { FILES_REPOSITORY_TOKEN } from './providers/files.repository.provider';
 import {
   cancelDownloadInput,
   fileOutput,
+  findManyDownloadsInput,
+  findManyInput,
   finishDownloadInput,
   finishedDownloadOutput,
   id,
+  manyDownloadsOutput,
+  manyFilesOutput,
   saveFileInput,
   startDownloadInput,
   startedDownloadOutput,
@@ -37,7 +41,9 @@ describe('StatisticsService', () => {
         {
           provide: FILES_REPOSITORY_TOKEN,
           useFactory: () => ({
+            findById: jest.fn(),
             findByKey: jest.fn(),
+            findMany: jest.fn(),
             create: jest.fn(),
           }),
         },
@@ -45,6 +51,7 @@ describe('StatisticsService', () => {
           provide: DOWNLOADS_REPOSITORY_TOKEN,
           useFactory: () => ({
             findById: jest.fn(),
+            findMany: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
           }),
@@ -59,6 +66,120 @@ describe('StatisticsService', () => {
 
   it('should be defined', () => {
     expect(statisticsService).toBeDefined();
+  });
+
+  it('should find one file by id', async () => {
+    const findByIdFileSpy = jest
+      .spyOn(filesRepository, 'findById')
+      .mockResolvedValue(fileOutput);
+    const result = await statisticsService.findFileById(id);
+    expect(result).toEqual(fileOutput);
+    expect(findByIdFileSpy).toBeCalledWith(id);
+  });
+
+  it('should not find one file by id and return null', async () => {
+    const findByIdFileSpy = jest
+      .spyOn(filesRepository, 'findById')
+      .mockResolvedValue(null);
+    const result = await statisticsService.findFileById(id);
+    expect(result).toBeNull();
+    expect(findByIdFileSpy).toBeCalledWith(id);
+  });
+
+  it('should find many files', async () => {
+    const findManyFilesSpy = jest
+      .spyOn(filesRepository, 'findMany')
+      .mockResolvedValue(manyFilesOutput);
+    const result = await statisticsService.findManyFiles(findManyInput);
+    expect(result).toEqual(manyFilesOutput);
+    expect(findManyFilesSpy).toBeCalledWith(findManyInput);
+  });
+
+  it('should find many files with missing skip argument', async () => {
+    const findManyFilesSpy = jest
+      .spyOn(filesRepository, 'findMany')
+      .mockResolvedValue(manyFilesOutput);
+    const result = await statisticsService.findManyFiles({
+      limit: findManyInput.limit,
+    });
+    expect(result).toEqual(manyFilesOutput);
+    expect(findManyFilesSpy).toBeCalledWith({
+      skip: 0,
+      limit: findManyInput.limit,
+    });
+  });
+
+  it('should find many files with missing limit argument', async () => {
+    const findManyFilesSpy = jest
+      .spyOn(filesRepository, 'findMany')
+      .mockResolvedValue(manyFilesOutput);
+    const result = await statisticsService.findManyFiles({
+      skip: findManyInput.skip,
+    });
+    expect(result).toEqual(manyFilesOutput);
+    expect(findManyFilesSpy).toBeCalledWith({
+      skip: findManyInput.skip,
+      limit: 500,
+    });
+  });
+
+  it('should find one download by id', async () => {
+    const findByIdDownloadSpy = jest
+      .spyOn(downloadsRepository, 'findById')
+      .mockResolvedValue(finishedDownloadOutput);
+    const result = await statisticsService.findDownloadById(id);
+    expect(result).toEqual(finishedDownloadOutput);
+    expect(findByIdDownloadSpy).toBeCalledWith(id);
+  });
+
+  it('should not find one download by id and return null', async () => {
+    const findByIdDownloadSpy = jest
+      .spyOn(downloadsRepository, 'findById')
+      .mockResolvedValue(null);
+    const result = await statisticsService.findDownloadById(id);
+    expect(result).toBeNull();
+    expect(findByIdDownloadSpy).toBeCalledWith(id);
+  });
+
+  it('should find many downloads', async () => {
+    const findManyDownloadsSpy = jest
+      .spyOn(downloadsRepository, 'findMany')
+      .mockResolvedValue(manyDownloadsOutput);
+    const result = await statisticsService.findManyDownloads(
+      findManyDownloadsInput,
+    );
+    expect(result).toEqual(manyDownloadsOutput);
+    expect(findManyDownloadsSpy).toBeCalledWith(findManyDownloadsInput);
+  });
+
+  it('should find many downloads with missing skip argument', async () => {
+    const findManyDownloadsSpy = jest
+      .spyOn(downloadsRepository, 'findMany')
+      .mockResolvedValue(manyDownloadsOutput);
+    const result = await statisticsService.findManyDownloads({
+      limit: findManyDownloadsInput.limit,
+      fileId: findManyDownloadsInput.fileId,
+    });
+    expect(result).toEqual(manyDownloadsOutput);
+    expect(findManyDownloadsSpy).toBeCalledWith({
+      ...findManyDownloadsInput,
+      skip: 0,
+    });
+  });
+
+  it('should find many downloads with missing limit argument', async () => {
+    const findManyDownloadsSpy = jest
+      .spyOn(downloadsRepository, 'findMany')
+      .mockResolvedValue(manyDownloadsOutput);
+    const result = await statisticsService.findManyDownloads({
+      skip: findManyDownloadsInput.skip,
+      fileId: findManyDownloadsInput.fileId,
+    });
+    expect(result).toEqual(manyDownloadsOutput);
+    expect(findManyDownloadsSpy).toBeCalledWith({
+      ...findManyDownloadsInput,
+      limit: 500,
+    });
   });
 
   it('should save file', async () => {

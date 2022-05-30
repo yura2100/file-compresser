@@ -1,4 +1,11 @@
 import { DownloadStatus } from '../types';
+import { Paginated } from '../outputs';
+
+export type FindManyDownloadsInput = {
+  skip: number;
+  limit: number;
+  fileId: string;
+};
 
 export type CreateDownloadInput = {
   userId: string;
@@ -21,6 +28,8 @@ export type DownloadOutput = {
 
 export interface IDownloadsRepository {
   findById(downloadId: string): Promise<DownloadOutput | null>;
+
+  findMany(input: FindManyDownloadsInput): Promise<Paginated<DownloadOutput>>;
 
   create(input: CreateDownloadInput): Promise<string>;
 

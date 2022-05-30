@@ -6,8 +6,14 @@ import { DownloadNotFoundException } from './exceptions/download-not-found.excep
 import { DownloadNotStartedException } from './exceptions/download-not-started.exception';
 import {
   cancelDownloadInput,
+  fileOutput,
+  findManyDownloadsInput,
+  findManyInput,
   finishDownloadInput,
+  finishedDownloadOutput,
   id,
+  manyDownloadsOutput,
+  manyFilesOutput,
   saveFileInput,
   startDownloadInput,
 } from './fixtures';
@@ -23,6 +29,10 @@ describe('StatisticsController', () => {
         {
           provide: StatisticsService,
           useFactory: () => ({
+            findFileById: jest.fn(),
+            findManyFiles: jest.fn(),
+            findDownloadById: jest.fn(),
+            findManyDownloads: jest.fn(),
             saveFile: jest.fn(),
             startDownload: jest.fn(),
             finishDownload: jest.fn(),
@@ -38,6 +48,62 @@ describe('StatisticsController', () => {
 
   it('should be defined', () => {
     expect(statisticsController).toBeDefined();
+  });
+
+  it('should find one file by id', async () => {
+    const findFileByIdSpy = jest
+      .spyOn(statisticsService, 'findFileById')
+      .mockResolvedValue(fileOutput);
+    const result = await statisticsController.findFileById(id);
+    expect(result).toEqual(fileOutput);
+    expect(findFileByIdSpy).toBeCalledWith(id);
+  });
+
+  it('should not find one file by id and return null', async () => {
+    const findFileByIdSpy = jest
+      .spyOn(statisticsService, 'findFileById')
+      .mockResolvedValue(null);
+    const result = await statisticsController.findFileById(id);
+    expect(result).toBeNull();
+    expect(findFileByIdSpy).toBeCalledWith(id);
+  });
+
+  it('should find many files', async () => {
+    const findManyFilesSpy = jest
+      .spyOn(statisticsService, 'findManyFiles')
+      .mockResolvedValue(manyFilesOutput);
+    const result = await statisticsController.findManyFiles(findManyInput);
+    expect(result).toEqual(manyFilesOutput);
+    expect(findManyFilesSpy).toBeCalledWith(findManyInput);
+  });
+
+  it('should find one download by id', async () => {
+    const findDownloadByIdSpy = jest
+      .spyOn(statisticsService, 'findDownloadById')
+      .mockResolvedValue(finishedDownloadOutput);
+    const result = await statisticsController.findDownloadById(id);
+    expect(result).toEqual(finishedDownloadOutput);
+    expect(findDownloadByIdSpy).toBeCalledWith(id);
+  });
+
+  it('should not find one download by id and return null', async () => {
+    const findDownloadByIdSpy = jest
+      .spyOn(statisticsService, 'findDownloadById')
+      .mockResolvedValue(null);
+    const result = await statisticsController.findDownloadById(id);
+    expect(result).toBeNull();
+    expect(findDownloadByIdSpy).toBeCalledWith(id);
+  });
+
+  it('should find many downloads', async () => {
+    const findManyFilesSpy = jest
+      .spyOn(statisticsService, 'findManyDownloads')
+      .mockResolvedValue(manyDownloadsOutput);
+    const result = await statisticsController.findManyDownloads(
+      findManyDownloadsInput,
+    );
+    expect(result).toEqual(manyDownloadsOutput);
+    expect(findManyFilesSpy).toBeCalledWith(findManyDownloadsInput);
   });
 
   it('should save file', async () => {

@@ -3,9 +3,11 @@ import { Model } from 'mongoose';
 import {
   CreateDownloadInput,
   DownloadOutput,
+  FindManyDownloadsInput,
   IDownloadsRepository,
   UpdatedownloadInput,
 } from '../interfaces/downloads.repository.interface';
+import { Paginated } from '../outputs';
 import { Download, DownloadDocument } from '../schemas/download.schema';
 
 export class MongooseDownloadsRepository implements IDownloadsRepository {
@@ -14,9 +16,7 @@ export class MongooseDownloadsRepository implements IDownloadsRepository {
     private readonly downloadModel: Model<DownloadDocument>,
   ) {}
 
-  async findById(downloadId: string): Promise<DownloadOutput | null> {
-    const download = await this.downloadModel.findById(downloadId).exec();
-
+  private transform(download: DownloadDocument | null): DownloadOutput | null {
     if (!download) {
       return null;
     }
@@ -28,6 +28,34 @@ export class MongooseDownloadsRepository implements IDownloadsRepository {
       finishedAt: download.finishedAt,
       status: download.status,
       fileId: download.fileId,
+    };
+  }
+
+  async findById(downloadId: string): Promise<DownloadOutput | null> {
+    const download = await this.downloadModel.findById(downloadId).exec();
+    return this.transform(download);
+  }
+
+  async findMany({
+    skip,
+    limit,
+    fileId,
+  }: FindManyDownloadsInput): Promise<Paginated<DownloadOutput>> {
+    const [downloads, count] = await Promise.all([
+      this.downloadModel
+        .find()
+        .where({ fileId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.downloadModel.count().exec(),
+    ]);
+    return {
+      data: downloads.map(
+        (download) => this.transform(download) as DownloadOutput,
+      ),
+      count,
     };
   }
 
