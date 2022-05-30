@@ -1,0 +1,77 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type FileMeta {
+  size: Int!
+  mime: String!
+  name: String!
+  link: String!
+  key: String!
+}
+
+type File {
+  id: ID!
+  createdAt: DateTime!
+  userId: ID!
+  meta: FileMeta!
+  downloadsCount: Int!
+  downloads(cursor: String!, limit: Int = 500): PaginatedDownload!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type FileEdge {
+  cursor: String!
+  node: File!
+}
+
+type PaginatedFile {
+  edges: [FileEdge!]
+  totalCount: Int!
+  hasNextPage: Boolean!
+  endCursor: String!
+}
+
+type Download {
+  id: ID!
+  createdAt: DateTime!
+  finishedAt: DateTime
+  userId: ID!
+  fileId: ID!
+  status: DownloadStatus!
+  file: File!
+}
+
+enum DownloadStatus {
+  STARTED
+  FINISHED
+  CANCELED
+}
+
+type DownloadEdge {
+  cursor: String!
+  node: Download!
+}
+
+type PaginatedDownload {
+  edges: [DownloadEdge!]
+  totalCount: Int!
+  hasNextPage: Boolean!
+  endCursor: String!
+}
+
+type Query {
+  file(id: ID!): File
+  files(cursor: String!, limit: Int = 500, userId: ID!): PaginatedFile!
+}
+
+type Mutation {
+  uploadFile(file: Upload!): File!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
